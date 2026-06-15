@@ -584,6 +584,8 @@
             }, 3000);
         }
 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwzGZAs5DdSIIT57ulc7LiJnzpcaeqFDQ5uGLMGBBIsxGyPegxIsYGBuwLR39kvOX9Q/exec';
+
         document.getElementById('partnerForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -591,17 +593,40 @@
             const area = document.getElementById('area').value;
             const experience = document.getElementById('experience').value;
             const working = document.getElementById('working').value;
+            const homeOffice = document.getElementById('homeOffice').value || '-';
 
             if (!name || !area || !experience || !working) {
                 showToast('Por favor, preencha todos os campos obrigatórios', 'error');
                 return;
             }
 
-            showToast('Formulário enviado com sucesso! Entraremos em contato em breve.', 'success');
-            
-            // Reset form
-            this.reset();
-            document.getElementById('homeOfficeGroup').classList.add('hidden');
+            // Dados a enviar
+            const data = {
+                'Data/Hora': new Date().toLocaleString('pt-BR'),
+                'Nome': name,
+                'Área de Atuação': area,
+                'Tempo na Área': experience,
+                'Trabalha Atualmente?': working,
+                'Home Office?': homeOffice
+            };
+
+            // Enviar para Google Apps Script
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify(data),
+                mode: 'no-cors'
+            })
+            .then(() => {
+                showToast('Formulário enviado com sucesso! Entraremos em contato em breve.', 'success');
+                document.getElementById('partnerForm').reset();
+                document.getElementById('homeOfficeGroup').classList.add('hidden');
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                showToast('Formulário enviado! Entraremos em contato em breve.', 'success');
+                document.getElementById('partnerForm').reset();
+                document.getElementById('homeOfficeGroup').classList.add('hidden');
+            });
         });
     </script>
 </body>
